@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoBot Delivery System</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface2: #f2f1ee;
+  --border: #e4e2dd;
+  --border2: #d0cdc7;
+  --text: #1a1917;
+  --text-mid: #5c5955;
+  --text-soft: #9c9894;
+  --accent-a: #2563eb;
+  --accent-a-light: #eff6ff;
+  --accent-b: #7c3aed;
+  --accent-b-light: #f5f3ff;
+  --accent-c: #059669;
+  --accent-c-light: #ecfdf5;
+  --accent-d: #d97706;
+  --accent-d-light: #fffbeb;
+  --red: #dc2626;
+  --red-light: #fef2f2;
+  --green: #16a34a;
+  --green-light: #f0fdf4;
+  --node-w: 260px;
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-focus: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* ─── HEADER ─── */
+header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  background: rgba(247,246,243,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  height: 58px;
+  display: flex; align-items: center;
+  padding: 0 28px;
+  gap: 20px;
+}
+
+.logo {
+  font-family: 'Instrument Serif', serif;
+  font-size: 19px;
+  color: var(--text);
+  letter-spacing: -0.3px;
+  flex-shrink: 0;
+}
+
+.logo em { font-style: italic; color: var(--accent-a); }
+
+.header-divider { width: 1px; height: 18px; background: var(--border2); }
+
+.header-tag {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  color: var(--text-soft);
+  letter-spacing: 0.5px;
+}
+
+.header-right {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 10px;
+}
+
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green);
+  animation: blink 2s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.live-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px; color: var(--text-soft);
+}
+
+/* ─── TABS ─── */
+.tab-bar {
+  position: fixed; top: 58px; left: 0; right: 0; z-index: 190;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tab-bar::-webkit-scrollbar { display: none; }
+
+.tab {
+  padding: 14px 22px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-soft);
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.18s;
+  display: flex; align-items: center; gap: 8px;
+  position: relative;
+  user-select: none;
+}
+.tab:hover { color: var(--text); background: var(--surface2); }
+.tab.active { color: var(--text); border-bottom-color: var(--text); }
+
+.tab-chip {
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+}
+.chip-a { background: var(--accent-a-light); color: var(--accent-a); }
+.chip-b { background: var(--accent-b-light); color: var(--accent-b); }
+.chip-c { background: var(--accent-c-light); color: var(--accent-c); }
+.chip-d { background: var(--accent-d-light); color: var(--accent-d); }
+
+/* ─── MAIN ─── */
+.main { padding-top: 116px; }
+
+.panel { display: none; animation: fadeUp 0.25s ease; }
+.panel.active { display: grid; grid-template-columns: 1fr 300px; gap: 0; min-height: calc(100vh - 116px); }
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+/* ─── LEFT FLOW AREA ─── */
+.flow-area {
+  padding: 32px 36px 60px;
+  border-right: 1px solid var(--border);
+}
+
+.scenario-header {
+  margin-bottom: 28px;
+}
+
+.scenario-eyebrow {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.scenario-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.scenario-desc {
+  color: var(--text-mid);
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 540px;
+}
+
+/* ─── CONTROLS ─── */
+.controls {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 7px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 6px;
+  line-height: 1;
+}
+
+.btn-primary {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+.btn-primary:hover { background: #333; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-mid);
+  border-color: var(--border2);
+}
+.btn-ghost:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+
+.btn-auto {
+  background: var(--surface2);
+  color: var(--text-mid);
+  border-color: var(--border);
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+}
+.btn-auto:hover { background: var(--border); color: var(--text); }
+.btn-auto.playing { background: var(--accent-d-light); color: var(--accent-d); border-color: #fed7aa; }
+
+.step-counter {
+  margin-left: auto;
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--text-soft);
+}
+.step-counter strong { color: var(--text); }
+
+/* ─── PROGRESS ─── */
+.progress-wrap { margin-bottom: 28px; }
+.progress-track {
+  height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--text);
+  transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  width: 0%;
+}
+
+/* ─── LEGEND ─── */
+.legend {
+  display: flex; flex-wrap: wrap; gap: 14px;
+  margin-bottom: 28px;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--text-soft);
+}
+.leg-swatch {
+  width: 8px; height: 8px; border-radius: 2px;
+}
+
+/* ─── FLOW NODES ─── */
+.flow-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 640px;
+}
+
+.flow-node {
+  width: var(--node-w);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  transition: all 0.35s cubic-bezier(0.34,1.3,0.64,1);
+  opacity: 0.3;
+  transform: scale(0.97);
+  position: relative;
+  cursor: default;
+}
+
+.flow-node.visited {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.flow-node.current {
+  opacity: 1;
+  transform: scale(1.02);
+  box-shadow: var(--shadow-md), var(--shadow-focus);
+}
+
+/* node type borders */
+.node-start   { border-left: 3px solid var(--text); }
+.node-action  { border-left: 3px solid var(--accent-c); }
+.node-system  { border-left: 3px solid var(--accent-a); }
+.node-otp     { border-left: 3px solid var(--accent-d); }
+.node-end     { border-left: 3px solid var(--green); }
+.node-fail    { border-left: 3px solid var(--red); }
+.node-info    { border-left: 3px solid var(--border2); }
+
+.node-current-start  .flow-node { box-shadow: var(--shadow-md), 0 0 0 3px rgba(26,25,23,0.1); }
+
+.node-type-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.node-start   .node-type-label { color: var(--text-mid); }
+.node-action  .node-type-label { color: var(--accent-c); }
+.node-system  .node-type-label { color: var(--accent-a); }
+.node-otp     .node-type-label { color: var(--accent-d); }
+.node-end     .node-type-label { color: var(--green); }
+.node-fail    .node-type-label { color: var(--red); }
+.node-info    .node-type-label { color: var(--text-soft); }
+
+.node-title {
+  font-weight: 600;
+  font-size: 13.5px;
+  line-height: 1.35;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.node-desc {
+  font-size: 12px;
+  color: var(--text-mid);
+  line-height: 1.55;
+}
+
+.node-tags {
+  display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px;
+}
+
+.ntag {
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+}
+.ntag-blue   { background: var(--accent-a-light); color: var(--accent-a); }
+.ntag-green  { background: var(--green-light); color: var(--green); }
+.ntag-amber  { background: var(--accent-d-light); color: var(--accent-d); }
+.ntag-red    { background: var(--red-light); color: var(--red); }
+.ntag-purple { background: var(--accent-b-light); color: var(--accent-b); }
+.ntag-gray   { background: var(--surface2); color: var(--text-soft); border: 1px solid var(--border); }
+
+/* ─── CONNECTORS ─── */
+.conn {
+  width: 1.5px;
+  background: var(--border2);
+  margin: 0 auto;
+  position: relative;
+  transition: background 0.4s;
+  flex-shrink: 0;
+}
+.conn.active { background: var(--text); }
+.conn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 50%;
+  transform: translateX(-50%);
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 6px solid var(--text);
+}
+
+.conn-label {
+  position: absolute;
+  left: 10px; top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+
+/* ─── DECISION ─── */
+.decision-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 580px;
+}
+
+.diamond {
+  width: 160px; height: 74px;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  transition: all 0.35s cubic-bezier(0.34,1.3,0.64,1);
+  opacity: 0.3;
+  transform: scale(0.97);
+}
+
+.diamond.visited { opacity: 1; transform: scale(1); }
+.diamond.current { opacity: 1; transform: scale(1.04); }
+
+.diamond-bg {
+  position: absolute; inset: 0;
+  background: var(--surface);
+  border: 1.5px solid var(--accent-d);
+  transform: rotate(45deg) scale(0.72);
+  border-radius: 5px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.35s;
+}
+.diamond.current .diamond-bg {
+  box-shadow: var(--shadow-md), 0 0 0 3px rgba(217,119,6,0.12);
+}
+
+.diamond-text {
+  position: relative; z-index: 1;
+  font-size: 12px; font-weight: 600;
+  color: var(--text); line-height: 1.3;
+}
+.diamond-sub {
+  position: relative; z-index: 1;
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px; color: var(--accent-d);
+  margin-top: 2px;
+}
+
+/* branch */
+.branch-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+  width: 100%;
+  justify-content: center;
+}
+
+.branch-col {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 6px;
+  flex: 1; max-width: 220px;
+}
+
+.branch-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+}
+.bl-yes { background: var(--green-light); color: var(--green); }
+.bl-no  { background: var(--red-light); color: var(--red); }
+
+.branch-node {
+  width: 100%;
+  border-radius: 8px;
+  padding: 11px 13px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  transition: all 0.35s cubic-bezier(0.34,1.3,0.64,1);
+  opacity: 0.3; transform: scale(0.97);
+}
+.branch-node.visited { opacity: 1; transform: scale(1); }
+.branch-node.current { opacity: 1; transform: scale(1.02); }
+.branch-node .node-title { font-size: 12px; }
+.branch-node .node-desc { font-size: 11px; }
+
+.branch-v { width: 1.5px; height: 22px; background: var(--border2); margin: 0 auto; }
+
+/* ─── SECTION DIVIDER ─── */
+.section-div {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; max-width: 580px;
+  margin: 24px 0 20px;
+}
+.section-line { flex: 1; height: 1px; background: var(--border); }
+.section-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px; letter-spacing: 1.2px;
+  color: var(--text-soft); text-transform: uppercase;
+  white-space: nowrap;
+  padding: 3px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  padding: 28px 22px;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  position: sticky;
+  top: 116px;
+  height: calc(100vh - 116px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.card-title {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px; letter-spacing: 0.8px;
+  color: var(--text-soft); text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 7px;
+}
+
+.spec-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.spec-row:last-child { border-bottom: none; padding-bottom: 0; }
+.spec-key { color: var(--text-mid); }
+.spec-val {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px; color: var(--text);
+}
+
+/* Robot badges */
+.robot-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.robot-badge {
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 6px;
+  text-align: center;
+  transition: all 0.3s;
+}
+.robot-icon { font-size: 18px; margin-bottom: 4px; }
+.robot-id { font-family: 'Geist Mono', monospace; font-size: 9px; color: var(--text-soft); }
+.robot-status {
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px; margin-top: 4px;
+  padding: 2px 6px; border-radius: 20px;
+}
+.rs-standby { background: var(--green-light); color: var(--green); }
+.rs-active   { background: var(--accent-a-light); color: var(--accent-a); animation: blink 1.5s infinite; }
+.rs-charge   { background: var(--accent-d-light); color: var(--accent-d); }
+
+/* OTP display */
+.otp-box {
+  font-family: 'Geist Mono', monospace;
+  font-size: 26px; letter-spacing: 8px;
+  color: var(--text);
+  text-align: center;
+  padding: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 8px 0;
+}
+.otp-hint { font-size: 11px; color: var(--text-soft); text-align: center; }
+
+/* Battery */
+.bat-track {
+  height: 8px; background: var(--surface2);
+  border-radius: 20px; overflow: hidden;
+  border: 1px solid var(--border);
+  margin: 6px 0;
+}
+.bat-fill {
+  height: 100%; border-radius: 20px;
+  transition: width 0.6s ease, background 0.4s;
+}
+.bat-high { background: var(--green); }
+.bat-med  { background: var(--accent-d); }
+.bat-low  { background: var(--red); }
+
+/* Weight */
+.weight-big {
+  font-family: 'Instrument Serif', serif;
+  font-size: 42px; color: var(--text);
+  text-align: center;
+  line-height: 1;
+}
+.weight-unit { font-size: 14px; color: var(--text-soft); margin-left: 3px; }
+
+/* CCTV */
+.cctv-feed {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  aspect-ratio: 16/9;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  margin-bottom: 8px;
+}
+.cctv-label {
+  position: absolute; top: 7px; left: 9px;
+  font-family: 'Geist Mono', monospace; font-size: 9px;
+  display: flex; align-items: center; gap: 5px;
+}
+
+/* Vacation */
+.vac-date-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px;
+  text-align: center; margin-bottom: 10px;
+}
+.vac-date {
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px; color: var(--text);
+}
+
+/* Shelf grid */
+.shelf-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+.shelf-cell {
+  background: var(--surface2);
+  border: 1px dashed var(--border);
+  border-radius: 6px; padding: 8px 6px;
+  text-align: center;
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px; color: var(--text-soft);
+  transition: all 0.4s;
+}
+.shelf-cell.filled {
+  background: var(--accent-a-light);
+  border: 1px solid #bfdbfe;
+  color: var(--accent-a);
+  border-style: solid;
+}
+
+/* Transit timer */
+.timer-big {
+  font-family: 'Geist Mono', monospace;
+  font-size: 30px; color: var(--text);
+  text-align: center; padding: 10px;
+}
+
+/* Parking map */
+.park-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+.park-cell {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px; padding: 8px 6px;
+  text-align: center;
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px; color: var(--text-soft);
+}
+.park-cell.active-spot {
+  background: var(--accent-a-light);
+  border-color: #93c5fd;
+  color: var(--accent-a);
+  font-weight: 600;
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ─── FLOATING NEXT BUTTON ─── */
+.float-bar {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 50px;
+  padding: 8px 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+  transition: opacity 0.2s;
+}
+
+.float-bar:hover { box-shadow: 0 12px 32px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.07); }
+
+.float-step {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--text-soft);
+  padding: 0 6px;
+  white-space: nowrap;
+}
+
+.float-step strong { color: var(--text); }
+
+.float-divider {
+  width: 1px; height: 18px;
+  background: var(--border);
+}
+
+.btn-float-next {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 20px;
+  border-radius: 40px;
+  cursor: pointer;
+  border: none;
+  background: var(--text);
+  color: var(--bg);
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 6px;
+  line-height: 1;
+}
+.btn-float-next:hover { background: #333; transform: translateY(-1px); }
+.btn-float-next:active { transform: translateY(0); }
+.btn-float-next:disabled {
+  background: var(--border);
+  color: var(--text-soft);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-float-reset {
+  font-size: 13px;
+  padding: 9px 14px;
+  border-radius: 40px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-soft);
+  transition: all 0.15s;
+  line-height: 1;
+}
+.btn-float-reset:hover { background: var(--surface2); color: var(--text); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .panel.active { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; border-left: none; border-top: 1px solid var(--border); }
+  .flow-area { padding: 24px 16px 40px; }
+  :root { --node-w: 240px; }
+  .float-bar { bottom: 16px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Delive<em>roid</em></div>
+  <div class="header-divider"></div>
+  <div class="header-tag">Delivery System Simulation</div>
+  <div class="header-right">
+    <div class="live-dot"></div>
+    <div class="live-label" id="clockEl">--:--</div>
+  </div>
+</header>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="switchTab('a')">
+    <span class="tab-chip chip-a">A</span> Gate → Flat
+  </div>
+  <div class="tab" onclick="switchTab('b')">
+    <span class="tab-chip chip-b">B</span> Return Order
+  </div>
+  <div class="tab" onclick="switchTab('c')">
+    <span class="tab-chip chip-c">C</span> Parking → Flat
+  </div>
+  <div class="tab" onclick="switchTab('d')">
+    <span class="tab-chip chip-d">D/E</span> Vacation & Transit
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ══════════════════════════════════
+     SCENARIO A
+══════════════════════════════════ -->
+<div class="panel active" id="panel-a">
+  <div class="flow-area">
+    <div class="scenario-header">
+      <div class="scenario-eyebrow">Scenario A</div>
+      <h1 class="scenario-title">Gate to Flat Delivery</h1>
+      <p class="scenario-desc">Delivery person arrives at gate, robot is allocated from the standby pool, package is loaded with video proof, and the robot autonomously navigates to the customer's flat.</p>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-primary" onclick="startFlow('a')">▶ Start</button>
+      <button class="btn btn-ghost" onclick="nextStep('a')">Next →</button>
+      <button class="btn btn-ghost" onclick="resetFlow('a')">↺ Reset</button>
+      <button class="btn btn-auto" id="auto-btn-a" onclick="autoPlay('a')">⚡ Auto</button>
+      <div class="step-counter">Step <strong id="step-a">0</strong> / <strong id="total-a">0</strong></div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="prog-a"></div></div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="leg-swatch" style="background:var(--text)"></div>Trigger / Start</div>
+      <div class="legend-item"><div class="leg-swatch" style="background:var(--accent-a)"></div>System</div>
+      <div class="legend-item"><div class="leg-swatch" style="background:var(--accent-c)"></div>User Action</div>
+      <div class="legend-item"><div class="leg-swatch" style="background:var(--accent-d)"></div>OTP / Security</div>
+      <div class="legend-item"><div class="leg-swatch" style="background:#d97706"></div>Decision</div>
+      <div class="legend-item"><div class="leg-swatch" style="background:var(--green)"></div>Complete</div>
+    </div>
+
+    <div class="flow-col" id="flow-a">
+
+      <div class="flow-node node-start" data-flow="a" data-step="1">
+        <div class="node-type-label">Trigger</div>
+        <div class="node-title">Delivery Person Arrives at Gate</div>
+        <div class="node-desc">Scans QR code at security office. Digital form opens on their phone.</div>
+      </div>
+      <div class="conn" data-flow="a" data-conn="1" style="height:28px"></div>
+
+      <div class="flow-node node-action" data-flow="a" data-step="2">
+        <div class="node-type-label">User Input</div>
+        <div class="node-title">Fill Delivery Form</div>
+        <div class="node-desc">Enters name, flat number, parcel type. Taps "Call Robot".</div>
+      </div>
+      <div class="conn" data-flow="a" data-conn="2" style="height:28px"></div>
+
+      <div class="flow-node node-system" data-flow="a" data-step="3">
+        <div class="node-type-label">Backend</div>
+        <div class="node-title">Robot Allocated from Standby Pool</div>
+        <div class="node-desc">One of 3 standby robots is assigned. Robot moves to gate front. Standby slot auto-replenished from docking station.</div>
+        <div class="node-tags">
+          <span class="ntag ntag-blue">Auto-replenish</span>
+          <span class="ntag ntag-gray">3 standby slots</span>
+        </div>
+      </div>
+      <div class="conn" data-flow="a" data-conn="3" style="height:28px"></div>
+
+      <div class="flow-node node-otp" data-flow="a" data-step="4">
+        <div class="node-type-label">Security — OTP #1</div>
+        <div class="node-title">First OTP Generated</div>
+        <div class="node-desc">Form advances to page 2. OTP sent to delivery person. Robot ID displayed for physical matching.</div>
+        <div class="node-tags">
+          <span class="ntag ntag-amber">5 min validity</span>
+        </div>
+      </div>
+      <div class="conn" data-flow="a" data-conn="4" style="height:28px"></div>
+
+      <div class="flow-node node-action" data-flow="a" data-step="5">
+        <div class="node-type-label">User Action</div>
+        <div class="node-title">Verify Robot ID & Enter OTP</div>
+        <div class="node-desc">Matches physical Robot ID label. Enters OTP on robot touchscreen. Compartment unlocks.</div>
+      </div>
+      <div class="conn" data-flow="a" data-conn="5" style="height:28px"></div>
+
+      <div class="flow-node node-action" data-flow="a" data-step="6">
+        <div class="node-type-label">Video Proof</div>
+        <div class="node-title">Place Package + Record 5-sec Video</div>
+        <div class="node-desc">Places package. Records full robot in frame, placement visible, compartment closing. Uploads to form. Locks compartment.</div>
+        <div class="node-tags">
+          <span class="ntag ntag-red">● REC 5 sec</span>
+          <span class="ntag ntag-gray">Stored 7 days</span>
+        </div>
+      </div>
+      <div class="conn" data-flow="a" data-conn="6" style="height:28px"></div>
+
+      <!-- Decision: forgot item? -->
+      <div class="decision-wrap" data-flow="a" data-step="7">
+        <div class="diamond" data-flow="a" data-step="7">
+          <div class="diamond-bg"></div>
+          <div class="diamond-text">Forgot item?</div>
+          <div class="diamond-sub">Decision</div>
+        </div>
+        <div class="branch-row">
+          <div class="branch-col">
+            <div class="branch-v"></div>
+            <div class="branch-label bl-yes">YES — Re-open</div>
+            <div class="branch-node node-info" data-flow="a" data-step="7a">
+              <div class="node-type-label" style="color:var(--accent-d)">Repeat</div>
+              <div class="node-title">Unlock & Re-record</div>
+              <div class="node-desc" style="font-size:11px">Full 5-sec video protocol must repeat entirely</div>
+            </div>
+          </div>
+          <div class="branch-col">
+            <div class="branch-v"></div>
+            <div class="branch-label bl-no">NO — Continue</div>
+            <div class="branch-node node-system" data-flow="a" data-step="7b">
+              <div class="node-type-label">Lock</div>
+              <div class="node-title">Confirm & Start Delivery</div>
+              <div class="node-desc" style="font-size:11px">Compartment locked. Delivery sequence initiated.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="conn" data-flow="a" data-conn="7" style="height:28px"></div>
+
+      <div class="flow-node node-system" data-flow="a" data-step="8">
+        <div class="node-type-label">Notification</div>
+        <div class="node-title">Customer Notified + Video Sent</div>
+        <div class="node-desc">Placement video sent to flat owner's account. Push notification with ETA and live tracking link.</div>
+        <div class="node-tags"><span class="ntag ntag-green">App push</span></div>
+      </div>
+      <div class="conn" data-flow="a" data-conn="8" style="height:28px"></div>
+
+      <div class="flow-node node-system" data-flow="a" data-step="9">
+        <div class="node-type-label">Navigation</div>
+        <div class="node-title">Robot Navigates to Flat</div>
+        <div class="node-desc">SLAM algorithm + LiDAR + cameras. Elevator via dry relay method. Travels block → floor → flat number.</div>
+        <div class="node-tags">
+          <span class="ntag ntag-blue">SLAM</span>
+          <span class="ntag ntag-blue">LiDAR</span>
+          <span class="ntag ntag-purple">Dry relay</span>
+        </div>
+      </div>
+      <div class="conn" data-flow="a" data-conn="9" style="height:28px"></div>
+
+      <div class="flow-node node-otp" data-flow="a" data-step="10">
+        <div class="node-type-label">Security — OTP #2</div>
+        <div class="node-title">Customer Notified + OTP Sent</div>
+        <div class="node-desc">Drop Bell rings at flat. App notification sent. Customer selects correct 2-digit code from multiple options (Gmail-style).</div>
+        <div class="node-tags">
+          <span class="ntag ntag-amber">15 min validity</span>
+          <span class="ntag ntag-green">Drop Bell</span>
+        </div>
+      </div>
+      <div class="conn" data-flow="a" data-conn="10" style="height:28px"></div>
+
+      <div class="flow-node node-action" data-flow="a" data-step="11">
+        <div class="node-type-label">Retrieval</div>
+        <div class="node-title">Customer Retrieves Package</div>
+        <div class="node-desc">Compartment unlocks. Customer takes package. Delivery marked successful in backend.</div>
+      </div>
+      <div class="conn" data-flow="a" data-conn="11" style="height:28px"></div>
+
+      <!-- Decision: return order? -->
+      <div class="decision-wrap" data-flow="a" data-step="12">
+        <div class="diamond" data-flow="a" data-step="12">
+          <div class="diamond-bg"></div>
+          <div class="diamond-text">Return order + battery OK?</div>
+          <div class="diamond-sub">Battery check</div>
+        </div>
+        <div class="branch-row">
+          <div class="branch-col">
+            <div class="branch-v"></div>
+            <div class="branch-label bl-yes">YES</div>
+            <div class="branch-node node-action" data-flow="a" data-step="12a">
+              <div class="node-type-label" style="color:var(--accent-c)">Accept</div>
+              <div class="node-title">Accept Return Order</div>
+              <div class="node-desc" style="font-size:11px">Navigate to pickup flat → run return workflow</div>
+            </div>
+          </div>
+          <div class="branch-col">
+            <div class="branch-v"></div>
+            <div class="branch-label bl-no">NO / Low battery</div>
+            <div class="branch-node node-system" data-flow="a" data-step="12b">
+              <div class="node-type-label">Dock</div>
+              <div class="node-title">Return to Docking</div>
+              <div class="node-desc" style="font-size:11px">3-hour recharge. Rejoins standby pool.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="conn" data-flow="a" data-conn="12" style="height:28px"></div>
+
+      <div class="flow-node node-end" data-flow="a" data-step="13">
+        <div class="node-type-label">Complete</div>
+        <div class="node-title">✓ Delivery Successful</div>
+        <div class="node-desc">Package delivered. Standby pool replenished. System ready for next delivery.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SIDEBAR A -->
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-title">🤖 Standby Pool</div>
+      <div class="robot-grid">
+        <div class="robot-badge">
+          <div class="robot-icon">🤖</div>
+          <div class="robot-id">BOT-01</div>
+          <div class="robot-status rs-standby">Standby</div>
+        </div>
+        <div class="robot-badge">
+          <div class="robot-icon">🤖</div>
+          <div class="robot-id">BOT-02</div>
+          <div class="robot-status rs-active" id="botAStatus">Active</div>
+        </div>
+        <div class="robot-badge">
+          <div class="robot-icon">🤖</div>
+          <div class="robot-id">BOT-03</div>
+          <div class="robot-status rs-standby">Standby</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔑 OTP Status</div>
+      <div style="font-size:11px;color:var(--text-soft);margin-bottom:4px;">OTP #1 — Delivery Person</div>
+      <div class="otp-box" id="otp1A">——</div>
+      <div class="otp-hint" id="otp1hint">5 min validity</div>
+      <div style="font-size:11px;color:var(--text-soft);margin:10px 0 4px;">OTP #2 — Customer</div>
+      <div class="otp-box" id="otp2A" style="color:var(--text-soft)">——</div>
+      <div class="otp-hint">15 min validity</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔋 Battery — BOT-02</div>
+      <div class="bat-track"><div class="bat-fill bat-high" id="batA" style="width:80%"></div></div>
+      <div style="font-size:11px;color:var(--text-mid);font-family:'Geist Mono',monospace;" id="batALabel">80% · 8 trips left</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 Specs</div>
+      <div class="spec-row"><span class="spec-key">Navigation</span><span class="spec-val">SLAM</span></div>
+      <div class="spec-row"><span class="spec-key">Sensors</span><span class="spec-val">LiDAR + Cam</span></div>
+      <div class="spec-row"><span class="spec-key">Elevator</span><span class="spec-val">Dry Relay</span></div>
+      <div class="spec-row"><span class="spec-key">Compartments</span><span class="spec-val">1 per robot</span></div>
+      <div class="spec-row"><span class="spec-key">Charge time</span><span class="spec-val">3 hours</span></div>
+      <div class="spec-row"><span class="spec-key">Trip range</span><span class="spec-val">10 trips</span></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════
+     SCENARIO B
+══════════════════════════════════ -->
+<div class="panel" id="panel-b">
+  <div class="flow-area">
+    <div class="scenario-header">
+      <div class="scenario-eyebrow">Scenario B</div>
+      <h1 class="scenario-title">Return Order</h1>
+      <p class="scenario-desc">Customer sends a package back to the delivery person at the gate. Includes live CCTV monitoring during handover and quality check with accept/reject logic.</p>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-primary" onclick="startFlow('b')">▶ Start</button>
+      <button class="btn btn-ghost" onclick="nextStep('b')">Next →</button>
+      <button class="btn btn-ghost" onclick="resetFlow('b')">↺ Reset</button>
+      <button class="btn btn-auto" id="auto-btn-b" onclick="autoPlay('b')">⚡ Auto</button>
+      <div class="step-counter">Step <strong id="step-b">0</strong> / <strong id="total-b">0</strong></div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="prog-b"></div></div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="leg-swatch" style="background:var(--text)"></div>Trigger</div>
+      <div class="legend-item"><div class="leg-swatch" style="background:var(--accent-a)"></div>System</div>
+      <div class="legend-item"><div class="leg-swatch" style="background:var(--accent-c)"></div>User Action</div>
+      <div class="legend-item"><div class="leg-swatch" style="background:var(--accent-d)"></div>OTP / Security</div>
+      <div class="legend-item"><div class="leg-swatch" style="background:var(--green)"></div>Complete</div>
+      <div class="legend-item"><div class="leg-swatch" style="background:var(--red)"></div>Failed</div>
+    </div>
+
+    <div class="flow-col" id="flow-b">
+
+      <div class="flow-node node-start" data-flow="b" data-step="1">
+        <div class="node-type-label">Trigger</div>
+        <div class="node-title">Customer Initiates Return</div>
+        <div class="node-desc">Opens app → Return Order → Calls robot to flat. Robot dispatched from standby/docking.</div>
+      </div>
+      <div class="conn" data-flow="b" data-conn="1" style="height:28px"></div>
+
+      <div class="flow-node node-otp" data-flow="b" data-step="2">
+        <div class="node-type-label">Security</div>
+        <div class="node-title">Robot Arrives — Customer Verifies</div>
+        <div class="node-desc">Customer identifies robot by Robot ID. Enters OTP on touchscreen. Compartment unlocks.</div>
+        <div class="node-tags"><span class="ntag ntag-amber">OTP verify</span></div>
+      </div>
+      <div class="conn" data-flow="b" data-conn="2" style="height:28px"></div>
+
+      <div class="flow-node node-action" data-flow="b" data-step="3">
+        <div class="node-type-label">Loading + Video</div>
+        <div class="node-title">Load Return Item + Record Video</div>
+        <div class="node-desc">Places return item. Records 5-second video. Uploads. Compartment locked securely.</div>
+        <div class="node-tags"><span class="ntag ntag-red">● REC 5 sec</span></div>
+      </div>
+      <div class="conn" data-flow="b" data-conn="3" style="height:28px"></div>
+
+      <div class="flow-node node-action" data-flow="b" data-step="4">
+        <div class="node-type-label">Coordination</div>
+        <div class="node-title">Share OTP + Robot ID with Delivery Person</div>
+        <div class="node-desc">Customer B sends Robot ID and OTP to delivery person via phone/message for gate-side retrieval.</div>
+        <div class="node-tags"><span class="ntag ntag-amber">OTP shared</span></div>
+      </div>
+      <div class="conn" data-flow="b" data-conn="4" style="height:28px"></div>
+
+      <div class="flow-node node-system" data-flow="b" data-step="5">
+        <div class="node-type-label">Navigation</div>
+        <div class="node-title">Robot Returns to Gate — Return Zone</div>
+        <div class="node-desc">Bypasses standby area. Parks in separate designated Return Zone for easy identification.</div>
+        <div class="node-tags"><span class="ntag ntag-blue">Return zone</span></div>
+      </div>
+      <div class="conn" data-flow="b" data-conn="5" style="height:28px"></div>
+
+      <div class="flow-node node-system" data-flow="b" data-step="6">
+        <div class="node-type-label">CCTV Monitoring</div>
+        <div class="node-title">Live Camera Active</div>
+        <div class="node-desc">Safety cameras on. Customer B watches live CCTV feed in app. Full transparency during handover.</div>
+        <div class="node-tags"><span class="ntag ntag-blue">Live feed</span></div>
+      </div>
+      <div class="conn" data-flow="b" data-conn="6" style="height:28px"></div>
+
+      <div class="flow-node node-otp" data-flow="b" data-step="7">
+        <div class="node-type-label">Gate Verification</div>
+        <div class="node-title">Delivery Person Opens with Shared OTP</div>
+        <div class="node-desc">Finds robot by Robot ID. Enters shared OTP. Opens compartment. Performs quality check on camera.</div>
+        <div class="node-tags"><span class="ntag ntag-amber">Shared OTP</span><span class="ntag ntag-blue">On camera</span></div>
+      </div>
+      <div class="conn" data-flow="b" data-conn="7" style="height:28px"></div>
+
+      <!-- Decision: accepted? -->
+      <div class="decision-wrap" data-flow="b" data-step="8">
+        <div class="diamond" data-flow="b" data-step="8">
+          <div class="diamond-bg"></div>
+          <div class="diamond-text">Return accepted?</div>
+          <div class="diamond-sub">Quality check</div>
+        </div>
+        <div class="branch-row">
+          <div class="branch-col">
+            <div class="branch-v"></div>
+            <div class="branch-label bl-yes">Accepted</div>
+            <div class="branch-node node-end" data-flow="b" data-step="8a">
+              <div class="node-type-label" style="color:var(--green)">Success</div>
+              <div class="node-title">✓ Return Complete</div>
+              <div class="node-desc" style="font-size:11px">Delivery person takes package. Marked successful.</div>
+            </div>
+          </div>
+          <div class="branch-col">
+            <div class="branch-v"></div>
+            <div class="branch-label bl-no">Refused</div>
+            <div class="branch-node node-fail" data-flow="b" data-step="8b">
+              <div class="node-type-label" style="color:var(--red)">Reversed</div>
+              <div class="node-title">Re-deliver to Customer B</div>
+              <div class="node-desc" style="font-size:11px">Gate-to-flat protocol reruns. Return marked failed.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="conn" data-flow="b" data-conn="8" style="height:28px"></div>
+
+      <!-- Decision: battery -->
+      <div class="decision-wrap" data-flow="b" data-step="9">
+        <div class="diamond" data-flow="b" data-step="9">
+          <div class="diamond-bg"></div>
+          <div class="diamond-text">Battery ≥ 2 trips?</div>
+          <div class="diamond-sub">Post-return check</div>
+        </div>
+        <div class="branch-row">
+          <div class="branch-col">
+            <div class="branch-v"></div>
+            <div class="branch-label bl-yes">Yes + slot open</div>
+            <div class="branch-node node-action" data-flow="b" data-step="9a">
+              <div class="node-type-label" style="color:var(--accent-c)">Standby</div>
+              <div class="node-title">Move to Standby Zone</div>
+              <div class="node-desc" style="font-size:11px">Secures slot behind gate. Ready for next delivery.</div>
+            </div>
+          </div>
+          <div class="branch-col">
+            <div class="branch-v"></div>
+            <div class="branch-label bl-no">Low battery</div>
+            <div class="branch-node node-system" data-flow="b" data-step="9b">
+              <div class="node-type-label">Dock</div>
+              <div class="node-title">Return to Docking</div>
+              <div class="node-desc" style="font-size:11px">3-hour recharge. Rejoins fleet pool.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SIDEBAR B -->
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-title">📹 CCTV Monitor</div>
+      <div class="cctv-feed" id="cctvB">
+        <div style="font-size:24px; color:var(--text-soft)">📷</div>
+        <div class="cctv-label">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--text-soft);"></div>
+          <span style="color:var(--text-soft)">Offline</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text-soft);">Activates when robot reaches return zone</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📦 Return Zone Info</div>
+      <div class="spec-row"><span class="spec-key">Location</span><span class="spec-val">Gate — Zone R</span></div>
+      <div class="spec-row"><span class="spec-key">Separation</span><span class="spec-val">Isolated</span></div>
+      <div class="spec-row"><span class="spec-key">Camera</span><span class="spec-val">Live CCTV</span></div>
+      <div class="spec-row"><span class="spec-key">OTP type</span><span class="spec-val">Shared</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔋 Battery</div>
+      <div class="bat-track"><div class="bat-fill bat-med" style="width:40%"></div></div>
+      <div style="font-size:11px;color:var(--text-mid);font-family:'Geist Mono',monospace;">40% — borderline (2 trips)</div>
+      <div style="font-size:11px;color:var(--text-soft);margin-top:6px;">Min required: gate ↔ flat × 2</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════
+     SCENARIO C
+══════════════════════════════════ -->
+<div class="panel" id="panel-c">
+  <div class="flow-area">
+    <div class="scenario-header">
+      <div class="scenario-eyebrow">Scenario C</div>
+      <h1 class="scenario-title">Parking to Flat</h1>
+      <p class="scenario-desc">Customer returns from shopping, parks, calls robot to their parking spot. Weight-based logic determines single or dual robot. Customer walks hands-free to flat.</p>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-primary" onclick="startFlow('c')">▶ Start</button>
+      <button class="btn btn-ghost" onclick="nextStep('c')">Next →</button>
+      <button class="btn btn-ghost" onclick="resetFlow('c')">↺ Reset</button>
+      <button class="btn btn-auto" id="auto-btn-c" onclick="autoPlay('c')">⚡ Auto</button>
+      <div class="step-counter">Step <strong id="step-c">0</strong> / <strong id="total-c">0</strong></div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="prog-c"></div></div>
+    </div>
+
+    <div class="flow-col" id="flow-c">
+
+      <div class="flow-node node-start" data-flow="c" data-step="1">
+        <div class="node-type-label">Trigger</div>
+        <div class="node-title">Customer Parks + Calls Robot</div>
+        <div class="node-desc">Parks in assigned spot. Opens app → "Call Robot to Parking". System uses flat ↔ parking pre-mapping.</div>
+        <div class="node-tags"><span class="ntag ntag-blue">Pre-mapped spots</span></div>
+      </div>
+      <div class="conn" data-flow="c" data-conn="1" style="height:28px"></div>
+
+      <div class="flow-node node-system" data-flow="c" data-step="2">
+        <div class="node-type-label">Dispatch</div>
+        <div class="node-title">Robot Dispatched to Parking</div>
+        <div class="node-desc">Backend maps flat to parking spot number. Robot navigates autonomously to customer's space.</div>
+        <div class="node-tags"><span class="ntag ntag-blue">SLAM</span></div>
+      </div>
+      <div class="conn" data-flow="c" data-conn="2" style="height:28px"></div>
+
+      <div class="flow-node node-action" data-flow="c" data-step="3">
+        <div class="node-type-label">Loading</div>
+        <div class="node-title">Customer Loads Groceries</div>
+        <div class="node-desc">Loads shopping bags and groceries into the robot compartment at parking spot. Weight sensor activates.</div>
+      </div>
+      <div class="conn" data-flow="c" data-conn="3" style="height:28px"></div>
+
+      <!-- Decision: weight -->
+      <div class="decision-wrap" data-flow="c" data-step="4">
+        <div class="diamond" data-flow="c" data-step="4">
+          <div class="diamond-bg"></div>
+          <div class="diamond-text">Weight ≤ 7 kg?</div>
+          <div class="diamond-sub">Weight check</div>
+        </div>
+        <div class="branch-row">
+          <div class="branch-col">
+            <div class="branch-v"></div>
+            <div class="branch-label bl-yes">Yes (≤ 7 kg)</div>
+            <div class="branch-node node-action" data-flow="c" data-step="4a">
+              <div class="node-type-label" style="color:var(--accent-c)">Single bot</div>
+              <div class="node-title">Navigate to Flat</div>
+              <div class="node-desc" style="font-size:11px">Flat number auto-filled. One robot proceeds.</div>
+            </div>
+          </div>
+          <div class="branch-col">
+            <div class="branch-v"></div>
+            <div class="branch-label bl-no">No (&gt; 7 kg)</div>
+            <div class="branch-node node-system" data-flow="c" data-step="4b">
+              <div class="node-type-label">Dual bot</div>
+              <div class="node-title">Call Second Robot</div>
+              <div class="node-desc" style="font-size:11px">Customer splits load across two robots.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="conn" data-flow="c" data-conn="4" style="height:28px"></div>
+
+      <div class="flow-node node-system" data-flow="c" data-step="5">
+        <div class="node-type-label">Navigation</div>
+        <div class="node-title">Robot Navigates to Flat</div>
+        <div class="node-desc">Robot travels parking → flat. Customer walks hands-free alongside or ahead.</div>
+        <div class="node-tags"><span class="ntag ntag-green">Hands-free</span><span class="ntag ntag-blue">SLAM</span></div>
+      </div>
+      <div class="conn" data-flow="c" data-conn="5" style="height:28px"></div>
+
+      <div class="flow-node node-otp" data-flow="c" data-step="6">
+        <div class="node-type-label">Arrival</div>
+        <div class="node-title">Robot at Doorstep — OTP Sent</div>
+        <div class="node-desc">Drop Bell rings. App notification. OTP generated. Customer selects 2-digit code from options.</div>
+        <div class="node-tags"><span class="ntag ntag-amber">15 min</span><span class="ntag ntag-green">Drop Bell</span></div>
+      </div>
+      <div class="conn" data-flow="c" data-conn="6" style="height:28px"></div>
+
+      <div class="flow-node node-action" data-flow="c" data-step="7">
+        <div class="node-type-label">Retrieval</div>
+        <div class="node-title">Retrieve Groceries at Door</div>
+        <div class="node-desc">Enters OTP. Compartment opens. Retrieves all items. No carrying from parking needed at all.</div>
+      </div>
+      <div class="conn" data-flow="c" data-conn="7" style="height:28px"></div>
+
+      <div class="flow-node node-end" data-flow="c" data-step="8">
+        <div class="node-type-label">Complete</div>
+        <div class="node-title">✓ Grocery Delivery Done</div>
+        <div class="node-desc">Hands-free delivery complete. Especially helpful for elderly and mobility-impaired residents.</div>
+        <div class="node-tags"><span class="ntag ntag-green">Accessible</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SIDEBAR C -->
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-title">⚖️ Weight Sensor</div>
+      <div style="text-align:center;padding:12px 0;">
+        <div class="weight-big"><span id="weightVal">0.0</span><span class="weight-unit">kg</span></div>
+      </div>
+      <div class="bat-track" style="height:10px;">
+        <div class="bat-fill" id="weightBar" style="width:0%;background:var(--accent-c);"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-soft);margin-top:4px;font-family:'Geist Mono',monospace;">
+        <span>0 kg</span><span style="color:var(--accent-d);">▲ 7 kg</span><span>15 kg</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🅿️ Parking Map</div>
+      <div class="park-grid">
+        <div class="park-cell">P-01<br><span style="color:var(--text-soft)">Flat 1A</span></div>
+        <div class="park-cell active-spot">P-02 ★<br><span>Active</span></div>
+        <div class="park-cell">P-03<br><span style="color:var(--text-soft)">Flat 2B</span></div>
+        <div class="park-cell">P-04<br><span style="color:var(--text-soft)">Flat 3A</span></div>
+        <div class="park-cell">P-05<br><span style="color:var(--text-soft)">Flat 4C</span></div>
+        <div class="park-cell">P-06<br><span style="color:var(--text-soft)">Flat 5B</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 Weight Rules</div>
+      <div class="spec-row"><span class="spec-key">Single robot max</span><span class="spec-val">7 kg</span></div>
+      <div class="spec-row"><span class="spec-key">Overweight</span><span class="spec-val">2nd robot</span></div>
+      <div class="spec-row"><span class="spec-key">Split load</span><span class="spec-val">Customer decides</span></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════
+     SCENARIO D/E
+══════════════════════════════════ -->
+<div class="panel" id="panel-d">
+  <div class="flow-area">
+    <div class="scenario-header">
+      <div class="scenario-eyebrow">Scenario D / E</div>
+      <h1 class="scenario-title">Vacation & Transit Storage</h1>
+      <p class="scenario-desc">Two smart availability features: Vacation Mode blocks deliveries during set dates. Transit Storage automatically holds packages when the customer is temporarily away.</p>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-primary" onclick="startFlow('d')">▶ Start</button>
+      <button class="btn btn-ghost" onclick="nextStep('d')">Next →</button>
+      <button class="btn btn-ghost" onclick="resetFlow('d')">↺ Reset</button>
+      <button class="btn btn-auto" id="auto-btn-d" onclick="autoPlay('d')">⚡ Auto</button>
+      <div class="step-counter">Step <strong id="step-d">0</strong> / <strong id="total-d">0</strong></div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="prog-d"></div></div>
+    </div>
+
+    <div class="flow-col" id="flow-d">
+
+      <div class="section-div">
+        <div class="section-line"></div>
+        <div class="section-label">Scenario D — Vacation Mode</div>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="flow-node node-start" data-flow="d" data-step="1">
+        <div class="node-type-label">Setup</div>
+        <div class="node-title">Customer Activates Vacation Mode</div>
+        <div class="node-desc">App → Settings → Vacation Mode ON → Set date range. Backend flags Customer ID: no deliveries allowed.</div>
+        <div class="node-tags"><span class="ntag ntag-amber">Date range block</span></div>
+      </div>
+      <div class="conn" data-flow="d" data-conn="1" style="height:28px"></div>
+
+      <div class="flow-node node-system" data-flow="d" data-step="2">
+        <div class="node-type-label">Attempt</div>
+        <div class="node-title">Delivery Person Tries to Deliver</div>
+        <div class="node-desc">Arrives at gate. Scans QR. Enters flat number. Clicks "Call Robot".</div>
+      </div>
+      <div class="conn" data-flow="d" data-conn="2" style="height:28px"></div>
+
+      <div class="flow-node node-fail" data-flow="d" data-step="3">
+        <div class="node-type-label">Blocked</div>
+        <div class="node-title">Robot Allocation Denied</div>
+        <div class="node-desc">System detects vacation mode. Form shows: "Customer unavailable — Vacation Mode active." Delivery must be rescheduled.</div>
+        <div class="node-tags"><span class="ntag ntag-red">Reschedule required</span></div>
+      </div>
+      <div class="conn" data-flow="d" data-conn="3" style="height:28px"></div>
+
+      <div class="flow-node node-end" data-flow="d" data-step="4">
+        <div class="node-type-label">Outcome</div>
+        <div class="node-title">✓ Package Protected Until Return</div>
+        <div class="node-desc">No unattended packages. Security risk eliminated. Deliveries resume automatically after vacation end date.</div>
+      </div>
+
+      <div class="section-div" style="margin-top:32px;">
+        <div class="section-line"></div>
+        <div class="section-label">Scenario E — Transit Storage</div>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="flow-node node-start" data-flow="d" data-step="5">
+        <div class="node-type-label">Trigger</div>
+        <div class="node-title">Robot at Flat — No Response</div>
+        <div class="node-desc">Robot arrives at doorstep. Drop Bell rings. App push sent. Customer not home or not responding.</div>
+        <div class="node-tags"><span class="ntag ntag-green">Drop Bell</span><span class="ntag ntag-green">App push</span></div>
+      </div>
+      <div class="conn" data-flow="d" data-conn="5" style="height:28px"></div>
+
+      <!-- Decision: response? -->
+      <div class="decision-wrap" data-flow="d" data-step="6">
+        <div class="diamond" data-flow="d" data-step="6">
+          <div class="diamond-bg"></div>
+          <div class="diamond-text">Customer responds?</div>
+          <div class="diamond-sub">10 min window</div>
+        </div>
+        <div class="branch-row">
+          <div class="branch-col">
+            <div class="branch-v"></div>
+            <div class="branch-label bl-yes">Yes — manual</div>
+            <div class="branch-node node-action" data-flow="d" data-step="6a">
+              <div class="node-type-label" style="color:var(--accent-c)">Manual</div>
+              <div class="node-title">Taps "Move to Transit"</div>
+              <div class="node-desc" style="font-size:11px">Customer taps in app. Robot immediately routes to transit facility.</div>
+            </div>
+          </div>
+          <div class="branch-col">
+            <div class="branch-v"></div>
+            <div class="branch-label bl-no">No — auto</div>
+            <div class="branch-node node-system" data-flow="d" data-step="6b">
+              <div class="node-type-label">Auto</div>
+              <div class="node-title">Auto-Transit after 10 min</div>
+              <div class="node-desc" style="font-size:11px">System routes robot. Customer can still recall if in time.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="conn" data-flow="d" data-conn="6" style="height:28px"></div>
+
+      <div class="flow-node node-system" data-flow="d" data-step="7">
+        <div class="node-type-label">Transit Facility</div>
+        <div class="node-title">Robotic Arm Unloads Package</div>
+        <div class="node-desc">Secure, climate-controlled zone. Zero human access. Robotic arm retrieves package, places on shelf, assigns to customer account.</div>
+        <div class="node-tags"><span class="ntag ntag-blue">Fully automated</span></div>
+      </div>
+      <div class="conn" data-flow="d" data-conn="7" style="height:28px"></div>
+
+      <div class="flow-node node-system" data-flow="d" data-step="8">
+        <div class="node-type-label">Storage</div>
+        <div class="node-title">Package Stored — Robot Returns to Service</div>
+        <div class="node-desc">Stored per shelf life limit. 3-day reminder notification scheduled. Robot freed for other deliveries.</div>
+        <div class="node-tags"><span class="ntag ntag-amber">3-day reminder</span></div>
+      </div>
+      <div class="conn" data-flow="d" data-conn="8" style="height:28px"></div>
+
+      <div class="flow-node node-action" data-flow="d" data-step="9">
+        <div class="node-type-label">Retrieval</div>
+        <div class="node-title">Customer Returns — Taps "Deliver Now"</div>
+        <div class="node-desc">App shows "Package in Transit Storage". Customer taps Deliver Now. Robot dispatched to transit. Arm loads package.</div>
+      </div>
+      <div class="conn" data-flow="d" data-conn="9" style="height:28px"></div>
+
+      <div class="flow-node node-otp" data-flow="d" data-step="10">
+        <div class="node-type-label">Final Delivery</div>
+        <div class="node-title">Standard OTP Delivery to Flat</div>
+        <div class="node-desc">Robot navigates to flat. Drop Bell + app notification. OTP #2 generated. Customer retrieves package normally.</div>
+        <div class="node-tags"><span class="ntag ntag-amber">OTP verify</span></div>
+      </div>
+      <div class="conn" data-flow="d" data-conn="10" style="height:28px"></div>
+
+      <div class="flow-node node-end" data-flow="d" data-step="11">
+        <div class="node-type-label">Complete</div>
+        <div class="node-title">✓ Package Retrieved Successfully</div>
+        <div class="node-desc">Delivered on customer's own schedule. No delays or missed packages from temporary absence.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SIDEBAR D -->
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-title">🏖️ Vacation Mode</div>
+      <div class="vac-date-box">
+        <div style="font-size:10px;color:var(--text-soft);margin-bottom:4px;font-family:'Geist Mono',monospace;">ACTIVE DATES</div>
+        <div class="vac-date" id="vacDates">Not set</div>
+      </div>
+      <div class="spec-row"><span class="spec-key">Status</span><span class="spec-val" id="vacStatD">OFF</span></div>
+      <div class="spec-row"><span class="spec-key">Deliveries</span><span class="spec-val" id="vacDelD">Allowed</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏭 Transit Shelves</div>
+      <div class="shelf-grid" id="shelfGrid">
+        <div class="shelf-cell">S-01<br>Empty</div>
+        <div class="shelf-cell">S-02<br>Empty</div>
+        <div class="shelf-cell">S-03<br>Empty</div>
+        <div class="shelf-cell">S-04<br>Empty</div>
+        <div class="shelf-cell">S-05<br>Empty</div>
+        <div class="shelf-cell">S-06<br>Empty</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⏱️ Auto-Transit Timer</div>
+      <div class="timer-big" id="transitTimerD">10:00</div>
+      <div style="font-size:11px;color:var(--text-soft);text-align:center;">Countdown to auto-transit</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 Transit Specs</div>
+      <div class="spec-row"><span class="spec-key">Access</span><span class="spec-val">Automated only</span></div>
+      <div class="spec-row"><span class="spec-key">Reminder</span><span class="spec-val">3 days</span></div>
+      <div class="spec-row"><span class="spec-key">Limit</span><span class="spec-val">Shelf life</span></div>
+      <div class="spec-row"><span class="spec-key">Retrieval</span><span class="spec-val">On-demand</span></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- FLOATING NEXT BAR -->
+<div class="float-bar" id="floatBar">
+  <button class="btn-float-reset" onclick="resetFlow(activeTab)" title="Reset">↺</button>
+  <div class="float-divider"></div>
+  <div class="float-step">Step <strong id="floatStep">0</strong> / <strong id="floatTotal">0</strong></div>
+  <div class="float-divider"></div>
+  <button class="btn-float-next" id="floatNextBtn" onclick="nextStep(activeTab)">Next →</button>
+</div>
+
+<script>
+// ─── ACTIVE TAB ───
+let activeTab = 'a';
+
+function updateFloatBar(f) {
+  document.getElementById('floatStep').textContent = S[f].cur;
+  document.getElementById('floatTotal').textContent = S[f].total;
+  const btn = document.getElementById('floatNextBtn');
+  if (S[f].cur >= S[f].total) {
+    btn.disabled = true;
+    btn.textContent = '✓ Done';
+  } else if (S[f].cur === 0) {
+    btn.disabled = false;
+    btn.textContent = '▶ Start';
+  } else {
+    btn.disabled = false;
+    btn.textContent = 'Next →';
+  }
+}
+
+// ─── STATE ───
+const S = {
+  a: { cur:0, total:0, timer:null, playing:false },
+  b: { cur:0, total:0, timer:null, playing:false },
+  c: { cur:0, total:0, timer:null, playing:false },
+  d: { cur:0, total:0, timer:null, playing:false },
+};
+
+// ─── INIT ───
+function init() {
+  ['a','b','c','d'].forEach(f => {
+    const steps = new Set();
+    document.querySelectorAll(`[data-flow="${f}"][data-step]`).forEach(n => {
+      const s = n.getAttribute('data-step');
+      if (!/[ab]$/.test(s)) steps.add(+s);
+    });
+    S[f].total = steps.size;
+    document.getElementById(`total-${f}`).textContent = steps.size;
+  });
+  updateFloatBar('a');
+  updateClock();
+  setInterval(updateClock, 30000);
+}
+
+function updateClock() {
+  const d = new Date();
+  document.getElementById('clockEl').textContent =
+    String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
+// ─── TAB ───
+function switchTab(id) {
+  activeTab = id;
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['a','b','c','d'][i] === id);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`panel-${id}`).classList.add('active');
+  updateFloatBar(id);
+}
+
+// ─── FLOW CONTROL ───
+function startFlow(f) {
+  resetFlow(f);
+  nextStep(f);
+}
+
+function resetFlow(f) {
+  if (S[f].timer) clearInterval(S[f].timer);
+  S[f].cur = 0; S[f].playing = false;
+  document.getElementById(`auto-btn-${f}`).classList.remove('playing');
+  document.getElementById(`auto-btn-${f}`).textContent = '⚡ Auto';
+
+  document.getElementById(`step-${f}`).textContent = '0';
+  document.getElementById(`prog-${f}`).style.width = '0%';
+
+  // Reset all nodes
+  document.querySelectorAll(`[data-flow="${f}"]`).forEach(n => {
+    n.classList.remove('visited','current');
+    if (!n.classList.contains('conn')) {
+      n.style.opacity = '0.3';
+      n.style.transform = 'scale(0.97)';
+    } else {
+      n.classList.remove('active');
+    }
+  });
+
+  // Sidebar resets
+  sidebarReset(f);
+  updateFloatBar(f);
+}
+
+function sidebarReset(f) {
+  if (f==='a') {
+    document.getElementById('otp1A').textContent='——';
+    document.getElementById('otp2A').textContent='——';
+    document.getElementById('batA').style.width='80%';
+    document.getElementById('batA').className='bat-fill bat-high';
+    document.getElementById('batALabel').textContent='80% · 8 trips left';
+    document.getElementById('botAStatus').textContent='Active';
+    document.getElementById('botAStatus').className='robot-status rs-active';
+  }
+  if (f==='b') {
+    const cctv = document.getElementById('cctvB');
+    cctv.innerHTML = `<div style="font-size:24px;color:var(--text-soft)">📷</div>
+      <div class="cctv-label"><div style="width:6px;height:6px;border-radius:50%;background:var(--text-soft);"></div><span style="color:var(--text-soft)">Offline</span></div>`;
+  }
+  if (f==='c') {
+    document.getElementById('weightVal').textContent='0.0';
+    document.getElementById('weightBar').style.width='0%';
+  }
+  if (f==='d') {
+    document.getElementById('vacDates').textContent='Not set';
+    document.getElementById('vacStatD').textContent='OFF';
+    document.getElementById('vacStatD').style.color='';
+    document.getElementById('vacDelD').textContent='Allowed';
+    document.getElementById('vacDelD').style.color='';
+    document.getElementById('transitTimerD').textContent='10:00';
+    document.querySelectorAll('#shelfGrid .shelf-cell').forEach((c,i) => {
+      c.className='shelf-cell';
+      c.innerHTML=`S-0${i+1}<br>Empty`;
+    });
+  }
+}
+
+function nextStep(f) {
+  const state = S[f];
+  if (state.cur >= state.total) return;
+  state.cur++;
+  document.getElementById(`step-${f}`).textContent = state.cur;
+  document.getElementById(`prog-${f}`).style.width = (state.cur / state.total * 100) + '%';
+
+  // Deactivate previous current
+  document.querySelectorAll(`[data-flow="${f}"].current`).forEach(n => {
+    n.classList.remove('current');
+    n.classList.add('visited');
+    n.style.opacity = '1';
+    n.style.transform = n.classList.contains('diamond') ? 'scale(1)' : 'scale(1)';
+  });
+
+  // Activate main node
+  const node = document.querySelector(`.flow-node[data-flow="${f}"][data-step="${state.cur}"]`);
+  if (node) {
+    node.classList.add('current','visited');
+    node.style.opacity='1'; node.style.transform='scale(1.02)';
+    setTimeout(() => node.scrollIntoView({behavior:'smooth',block:'center'}), 50);
+  }
+
+  // Activate diamond if decision
+  const diamond = document.querySelector(`.diamond[data-flow="${f}"][data-step="${state.cur}"]`);
+  if (diamond) {
+    diamond.classList.add('current','visited');
+    diamond.style.opacity='1'; diamond.style.transform='scale(1.04)';
+    // Show branch nodes
+    setTimeout(() => {
+      [`${state.cur}a`,`${state.cur}b`].forEach(s => {
+        const bn = document.querySelector(`[data-flow="${f}"][data-step="${s}"]`);
+        if (bn) { bn.classList.add('visited'); bn.style.opacity='1'; bn.style.transform='scale(1)'; }
+      });
+    }, 300);
+    setTimeout(() => diamond.scrollIntoView({behavior:'smooth',block:'center'}), 50);
+  }
+
+  // Connectors
+  const prevConn = document.querySelector(`.conn[data-flow="${f}"][data-conn="${state.cur-1}"]`);
+  if (prevConn) prevConn.classList.add('active');
+  const currConn = document.querySelector(`.conn[data-flow="${f}"][data-conn="${state.cur}"]`);
+  if (currConn) currConn.classList.add('active');
+
+  // Side effects
+  sideEffect(f, state.cur);
+  updateFloatBar(f);
+}
+
+function sideEffect(f, step) {
+  if (f==='a') {
+    if (step===3) {
+      document.getElementById('botAStatus').textContent='Dispatched';
+    }
+    if (step===4) scrambleOTP('otp1A');
+    if (step===9) {
+      document.getElementById('batA').style.width='60%';
+      document.getElementById('batALabel').textContent='60% · 6 trips left';
+    }
+    if (step===10) scrambleOTP('otp2A');
+    if (step===11) {
+      document.getElementById('batA').style.width='50%';
+      document.getElementById('batALabel').textContent='50% · 5 trips left';
+    }
+  }
+  if (f==='b' && step===5) {
+    const cctv = document.getElementById('cctvB');
+    cctv.innerHTML = `
+      <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(239,68,68,0.04),rgba(37,99,235,0.04));"></div>
+      <div style="font-size:22px;position:relative;">📹</div>
+      <div class="cctv-label" style="animation:blink 1.5s infinite">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--red);"></div>
+        <span style="color:var(--red);font-weight:600;">LIVE</span>
+      </div>
+      <div style="position:absolute;bottom:7px;right:9px;font-family:'Geist Mono',monospace;font-size:9px;color:var(--text-soft);">ZONE R · CAM 2</div>`;
+  }
+  if (f==='c' && step===3) {
+    let w=0;
+    const iv = setInterval(() => {
+      w+=0.2; if(w>5.4){clearInterval(iv);w=5.4;}
+      document.getElementById('weightVal').textContent=w.toFixed(1);
+      document.getElementById('weightBar').style.width=(w/15*100)+'%';
+    },40);
+  }
+  if (f==='d') {
+    if (step===1) {
+      document.getElementById('vacDates').textContent='Mar 15 – Mar 19';
+      document.getElementById('vacStatD').textContent='ACTIVE';
+      document.getElementById('vacStatD').style.color='var(--red)';
+      document.getElementById('vacDelD').textContent='BLOCKED';
+      document.getElementById('vacDelD').style.color='var(--red)';
+    }
+    if (step===4) {
+      document.getElementById('vacStatD').textContent='Cleared';
+      document.getElementById('vacStatD').style.color='var(--green)';
+      document.getElementById('vacDelD').textContent='Restored';
+      document.getElementById('vacDelD').style.color='var(--green)';
+    }
+    if (step===5) {
+      let t=600;
+      const iv=setInterval(()=>{
+        t-=6; if(t<0){clearInterval(iv);t=0;}
+        const m=Math.floor(t/60),s=t%60;
+        document.getElementById('transitTimerD').textContent=
+          String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+      },50);
+    }
+    if (step===7) {
+      const cells=document.querySelectorAll('#shelfGrid .shelf-cell');
+      if(cells[0]){
+        cells[0].classList.add('filled');
+        cells[0].innerHTML='S-01<br><strong>Stored</strong>';
+      }
+    }
+  }
+}
+
+function scrambleOTP(id) {
+  const el = document.getElementById(id);
+  const digits='0123456789';
+  let n=0;
+  const iv=setInterval(()=>{
+    el.textContent=Array.from({length:6},()=>digits[Math.floor(Math.random()*10)]).join('');
+    if(++n>18){clearInterval(iv);}
+  },45);
+}
+
+let autoIvs = {};
+function autoPlay(f) {
+  const btn = document.getElementById(`auto-btn-${f}`);
+  if (autoIvs[f]) {
+    clearInterval(autoIvs[f]); delete autoIvs[f];
+    btn.classList.remove('playing'); btn.textContent='⚡ Auto';
+    return;
+  }
+  startFlow(f);
+  btn.classList.add('playing'); btn.textContent='⏸ Pause';
+  autoIvs[f]=setInterval(()=>{
+    if(S[f].cur>=S[f].total){
+      clearInterval(autoIvs[f]); delete autoIvs[f];
+      btn.classList.remove('playing'); btn.textContent='⚡ Auto';
+      return;
+    }
+    nextStep(f);
+  }, 1500);
+}
+
+init();
+</script>
+</body>
+</html>
+
